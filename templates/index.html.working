@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Sarah and John's Wedding Uploads</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles.css') }}">
+</head>
+<body>
+<div class="container">
+<header>
+    <img src="static/header.jpg">
+</header>
+<h1>Welcome to Our Wedding!</h1>
+<p>Thank you for sharing this special occasion with us! Please take as many pictures and/or videos as you like and upload to our gallery!</p>
+<span style="text-align: center; align: center;">
+    <form id="uploadForm" action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+        <!-- Camera Button for Image -->
+        <input type="file" name="file" id="fileInput" accept="image/*" capture="camera">
+        <label for="fileInput">Camera</label>
+
+        <!-- Camera Button for Video -->
+        <input type="file" name="video" id="videoInput" accept="video/*" capture="camcorder">
+        <label for="videoInput">Video</label>
+
+        <!-- Hidden submit button to trigger form submission -->
+        <input type="submit" style="display: none;">
+    </form>
+</span>
+<p><img class="qr-code" src="static/qr-code.png"></p>
+<h2>Our Gallery</h2>
+<div class="gallery">
+    {% for image in images %}
+        <img src="{{ url_for('static', filename='uploads/' ~ image) }}" alt="Uploaded Image" class="gallery-item" onclick="openLightbox('{{ url_for('static', filename='uploads/' ~ image) }}', 'image')">
+    {% endfor %}
+
+    {% for video in videos %}
+        <div class="video-container">
+            <img src="{{ url_for('static', filename='uploads/thumbnails/' ~ video.rsplit('.', 1)[0] + '.png') }}" alt="Video Thumbnail" class="gallery-item" onclick="openLightbox('{{ url_for('static', filename='uploads/' ~ video) }}', 'video')">
+            <div class="play-overlay">
+                &#9658; <!-- Unicode character for play symbol -->
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="close" onclick="closeLightbox()">&times;</span>
+        <div class="lightbox-content" id="lightbox-content"></div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+    </div>
+
+<script>
+    document.getElementById('fileInput').addEventListener('change', function() {
+        // Show loading screen
+        document.getElementById('loadingScreen').style.display = 'flex';
+
+        // Automatically submit the form when an image file is selected
+        if (this.files.length > 0) {
+            document.getElementById('uploadForm').submit();
+        }
+    });
+
+    document.getElementById('videoInput').addEventListener('change', function() {
+        // Show loading screen
+        document.getElementById('loadingScreen').style.display = 'flex';
+
+        // Automatically submit the form when a video file is selected
+        if (this.files.length > 0) {
+            document.getElementById('uploadForm').submit();
+        }
+    });
+
+    function openLightbox(src, type) {
+        var lightbox = document.getElementById('lightbox');
+        var content = document.getElementById('lightbox-content');
+
+        // Clear any existing content
+        content.innerHTML = '';
+
+        if (type === 'image') {
+            var img = document.createElement('img');
+            img.src = src;
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '100%';
+            content.appendChild(img);
+        } else if (type === 'video') {
+            var video = document.createElement('video');
+            video.src = src;
+            video.controls = true;
+            video.style.maxWidth = '100%';
+            video.style.maxHeight = '100%';
+            content.appendChild(video);
+        }
+
+        lightbox.style.display = 'block';
+    }
+
+    function closeLightbox() {
+        var lightbox = document.getElementById('lightbox');
+        lightbox.style.display = 'none';
+    }
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <title>Sarah and John's Wedding Uploads</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles.css') }}">
+</head>
+<body>
+<div class="container">
+    <header>
+        <img src="static/header.jpg">
+    </header>
+    <h1>Welcome to Our Wedding!</h1>
+    <p>Thank you for sharing this special occasion with us! Please take as many pictures and/or videos as you like and upload to our gallery!</p>
+    <span style="text-align: center; align: center;">
+        <form id="uploadForm" action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+            <!-- Camera Button for Image -->
+            <input type="file" name="file" id="fileInput" accept="image/*" capture="camera">
+            <label for="fileInput">Camera</label>
+
+            <!-- Camera Button for Video -->
+            <input type="file" name="video" id="videoInput" accept="video/*" capture="camcorder">
+            <label for="videoInput">Video</label>
+
+            <!-- Hidden submit button to trigger form submission -->
+            <input type="submit" style="display: none;">
+        </form>
+    </span>
+    <p><img class="qr-code" src="static/qr-code.png"></p>
+    <h2>Our Gallery</h2>
+    <div class="gallery">
+        <!-- Image Thumbnails -->
+        {% for image in images %}
+            {% set image_thumbnail = image.lower() %}
+            {% if image_thumbnail.endswith('.jpg') or image_thumbnail.endswith('.jpeg') %}
+                <img src="{{ url_for('static', filename='thumbnails/' ~ image) }}" alt="Uploaded Image" class="gallery-item" loading="lazy" onclick="openLightbox('{{ url_for('static', filename='uploads/' ~ image) }}')">
+            {% endif %}
+        {% endfor %}
+    
+        <!-- Video Thumbnails -->
+        {% for video in videos %}
+            {% set video_thumbnail = video.lower().replace('.mov', '.png').replace('.mp4', '.png') %}
+            <div class="video-container">
+                <img src="{{ url_for('static', filename='thumbnails/' ~ video_thumbnail) }}" alt="Video Thumbnail" class="gallery-item video-thumbnail" loading="lazy" onclick="openLightbox('{{ url_for('static', filename='uploads/' ~ video) }}', 'video')">
+                <div class="play-overlay">
+                    &#9658; <!-- Unicode character for play symbol -->
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+        <span class="close" onclick="closeLightbox()">&times;</span>
+        <img class="lightbox-content" id="lightboxImage">
+        <video class="lightbox-content" id="lightboxVideo" controls></video>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // JavaScript for the lightbox effect
+        function openLightbox(src, isVideo = false) {
+            var lightbox = document.getElementById('lightbox');
+            var lightboxImage = document.getElementById('lightboxImage');
+            var lightboxVideo = document.getElementById('lightboxVideo');
+
+            if (isVideo) {
+                lightboxVideo.src = src;
+                lightboxVideo.style.display = 'block';
+                lightboxImage.style.display = 'none';
+            } else {
+                lightboxImage.src = src;
+                lightboxImage.style.display = 'block';
+                lightboxVideo.style.display = 'none';
+            }
+
+            lightbox.style.display = 'block';
+        }
+
+        function closeLightbox() {
+            var lightbox = document.getElementById('lightbox');
+            var lightboxImage = document.getElementById('lightboxImage');
+            var lightboxVideo = document.getElementById('lightboxVideo');
+
+            lightbox.style.display = 'none';
+            lightboxImage.src = '';
+            lightboxVideo.src = '';
+        }
+
+        // Loading screen logic
+        document.getElementById('fileInput').addEventListener('change', function() {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            if (this.files.length > 0) {
+                document.getElementById('uploadForm').submit();
+            }
+        });
+
+        document.getElementById('videoInput').addEventListener('change', function() {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            if (this.files.length > 0) {
+                document.getElementById('uploadForm').submit();
+            }
+        });
+    </script>
+</div>
+</body>
+</html>
